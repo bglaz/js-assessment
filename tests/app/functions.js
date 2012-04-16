@@ -53,7 +53,11 @@ define([ 'use!underscore' ], function(_) {
 
     it("you should be able to use arguments", function () {
       fn = function () {
-        // you can only edit function body here
+        var result = 0;
+        for(var i = arguments.length; i--;) {
+        	result += arguments[i];
+        }
+        return result;
       };
 
       var a = Math.random(), b = Math.random(), c = Math.random(), d = Math.random();
@@ -65,7 +69,9 @@ define([ 'use!underscore' ], function(_) {
 
     it("you should be able to apply functions", function () {
       fn = function (fun) {
-        // you can only edit function body here
+       var args = Array.prototype.slice.call(arguments);
+       args.splice(0,1);
+       fun.apply(this,args);
       };
 
       (function () {
@@ -97,7 +103,12 @@ define([ 'use!underscore' ], function(_) {
 
     it("you should be able to curry existing functions", function () {
       fn = function (fun) {
-        // you can only edit function body here
+       var args = Array.prototype.slice.call(arguments);
+       args.splice(0,1);
+        return function() {
+        	var args2 = Array.prototype.slice.call(arguments);
+        	return fun.apply(this,args.concat(args2));
+        }
       };
 
       var curryMe = function (x, y, z) {
@@ -118,13 +129,18 @@ define([ 'use!underscore' ], function(_) {
       var doSomeStuff;
 
       fn = function (vals) {
-        // you can only edit function body here
+        var results = [];
+        var makeFunc = function(arg) { return function() { return arg*arg;} };
+        for(var i=0, len = vals.length; i<len; i++) {
+			results.push(makeFunc(vals[i]));
+        }
+        return results;
       };
 
       doSomeStuff = function (x) { return x * x; };
 
       var funcs = fn(arr);
-      expect(funcs).to.have.length(5);
+      expect(funcs).to.have.length(arr.length);
       for (var i = funcs.length - 1; i >= 0; i--) {
         expect(funcs[i]()).to.be(doSomeStuff(arr[i]));
       };
